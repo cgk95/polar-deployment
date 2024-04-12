@@ -1,10 +1,9 @@
 version: "3.8"
 services:
-
   catalog-service:
     depends_on:
-        - polar-postgres
-        - config-service
+      - polar-postgres
+      - config-service
     image: "catalog-service"
     container_name: "catalog-service"
     ports:
@@ -39,6 +38,5 @@ services:
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=polardb_catalog
-
-
+    volumes: # 초기화 스크립트를 컨테이너에 볼륨으로 마운트 한다
+      - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
