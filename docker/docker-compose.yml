@@ -7,7 +7,7 @@ services:
     image: "catalog-service"
     container_name: "catalog-service"
     ports:
-      - "9091:9091"
+      - "9001:9001"
       - "8001:8001"
     environment:
       - BPL_JVM_THREAD_COUNT=50
@@ -17,6 +17,24 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://polar-postgres:5432/polardb_catalog
       - SPRING_PROFILES_ACTIVE=testdata
     platform: linux/amd64
+
+  order-service:
+    depends_on:
+      - polar-postgres
+    image: "order-service"
+    container_name: "order-service"
+    ports:
+      - 9002:9002
+      - 8002:8002
+    environment:
+      # Buildpacks environment variable to enable debug through a socket on port 8002
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=8002
+      - POLAR_CATALOG_SERVICE_URI=http://catalog-service:9001
+      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
+      - SPRING_R2DBC_URL=r2dbc:postgresql://polar-postgres:5432/polardb_order
+      - SPRING_FLYWAY_URL=jdbc:postgresql://polar-postgres:5432/polardb_order
+
 
   config-service:
     image: "config-service"
@@ -40,3 +58,9 @@ services:
       - POSTGRES_PASSWORD=password
     volumes: # 초기화 스크립트를 컨테이너에 볼륨으로 마운트 한다
       - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  polar-redis:
+    image: "redis:7.0"
+    container_name: "polar-redis"
+    ports:
+      - "6379:6379"
