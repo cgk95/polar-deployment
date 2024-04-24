@@ -24,8 +24,8 @@ services:
     image: "order-service"
     container_name: "order-service"
     ports:
-      - 9002:9002
-      - 8002:8002
+      - "9002:9002"
+      - "8002:8002"
     environment:
       # Buildpacks environment variable to enable debug through a socket on port 8002
       - BPL_DEBUG_ENABLED=true
@@ -78,11 +78,19 @@ services:
     image: "quay.io/keycloak/keycloak:19.0"
     container_name: "polar-keycloak"
     command:
-      - start-dev --import-realm # 애플리케이션 시작 시 제공된 설정을 임포트
+      - start-dev --import-realm # 키클록을 개발모드로 시작한다
     volumes:
       - ./keycloak:/opt/keycloak/data/import
-    environment:
+    environment: # 어드민 유저의 크리덴션을 환경 변수로 정의한다
       - KEYCLOAK_ADMIN=user
       - KEYCLOAK_ADMIN_PASSWORD=password
     ports:
       - "8080:8080"
+
+  polar-ui:
+    image: "ghcr.io/polarbookshop/polar-ui:v1"
+    container_name: "polar-ui"
+    ports:
+      - "9004:9004" # Nginx가 9004를 통해 SPA를 제공
+    environment:
+      - PORT=9004 # Nginx 서버의 포트를 9004로 설정한다
